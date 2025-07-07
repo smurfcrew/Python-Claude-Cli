@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 claude cli: command-line interface with Claude AI
 """
