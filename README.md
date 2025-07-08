@@ -42,7 +42,7 @@ chmod +x cli.py
 Using ```python cli.py --help``` will show you the available options:
 
 ```bash
-$ python cli.py --help                                                                   chris@semtex
+$ python cli.py --help
 usage: cli.py [-h] [--api-key API_KEY] [--model MODEL] [--max-tokens MAX_TOKENS] [--system SYSTEM] [--interactive]
               [--message MESSAGE] [--file FILE] [--load LOAD] [--save SAVE]
 
