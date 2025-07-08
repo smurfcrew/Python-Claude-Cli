@@ -30,7 +30,7 @@ or
 
 **Pass an Argument**
 ```bash
-python claude.py --api-key "your_api_key_here" 
+python cli.py --api-key "your_api_key_here" 
 ```
 
 **Make Executable (optional)**
