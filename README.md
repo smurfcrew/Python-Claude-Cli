@@ -42,7 +42,7 @@ pip install -e . # where -e is for editable install
 
 ## API Key Configuration
 
-**Ehnvironment Variable(Recommended)**
+**Environment Variable(Recommended)**
 In your .bashrc or .zshrc file, add the following line:
 
 ```bash
