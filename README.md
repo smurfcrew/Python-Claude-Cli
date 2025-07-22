@@ -16,8 +16,8 @@ So that people can interact with Claude AI from the command line, this project p
 1. Python 3.8 or higher
 2. API Key from [Anthropic](https://www.anthropic.com/) Costs may apply based on usage.
 3. Unix-like environment (Linux, macOS, WSL)
- 
 
+**UNTESTED Windows support (may require additional configuration) by using API key as an argument or setting it as an environment variable.**
 
 **Installation**
 

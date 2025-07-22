@@ -10,11 +10,15 @@ import argparse
 from typing import List, Dict, Any, Optional, Union
 import requests
 from pathlib import Path
+# adding color to the text
+from colorama import Fore, Back, Style, init
 
 import config
 
+init(autoreset=True)
+
 class ClaudeCLI:
-    def __init__(self, api_key: Optional[str] = None) -> None: # REMOVE THIS FUNCTION
+    def __init__(self, api_key: Optional[str] = None) -> None:
         """
         command-line interface for interacting with Claude AI.
         """
@@ -25,7 +29,8 @@ class ClaudeCLI:
         
         self.base_url = config.API_BASE_URL
         self.headers = config.get_api_headers(self.api_key)
-        self.conversation_history: List[Dict[str, str]] = [] # takes a list of dictionary that has a kvp of str,str
+        # takes a list of dictionary that has a kvp of str,str
+        self.conversation_history: List[Dict[str, str]] = [] 
 
     def send_message(self, message: str, model: str = config.DEFAULT_MODEL, 
                     max_tokens: int = config.DEFAULT_MAX_TOKENS, 
@@ -103,26 +108,50 @@ class ClaudeCLI:
             print(f"Error loading conversation: {e}")
             return False
 
+
+def print_header(text: str) -> None:
+    print(f"\n{Fore.CYAN}{Style.BRIGHT}{'=' * 60}")
+    print(f"{Fore.CYAN}{Style.BRIGHT}{text.center(60)}")
+    print(f"{Fore.CYAN}{Style.BRIGHT}{'=' * 60}{Style.RESET_ALL}")
+
+def print_info(text: str) -> None:
+    print(f"{Fore.BLUE}{Style.BRIGHT}{text}{Style.RESET_ALL}")
+
+def print_success(text: str) -> None:
+    print(f"{Fore.GREEN}{Style.BRIGHT}{text}{Style.RESET_ALL}")
+
+def print_warning(text: str) -> None:
+    print(f"{Fore.YELLOW}{Style.BRIGHT}{text}{Style.RESET_ALL}")
+
+def print_error(text: str) -> None:
+    print(f"{Fore.RED}{Style.BRIGHT}{text}{Style.RESET_ALL}")
+
+def print_separator() -> None:
+    print(f"{Fore.CYAN}{'-' * 60}{Style.RESET_ALL}")
+
+
 def interactive_mode(claude_cli: ClaudeCLI, model: str, max_tokens: int,
                       system_prompt: Optional[str] = None) -> None:
     """use interactive mode"""
     print(f"{config.CLI_NAME} - Interactive Mode")
-    print("Type 'quit', 'exit', or 'q' to quit")
-    print("Type 'clear' to clear conversation history")
-    print("Type 'save <filename>' to save conversation")
-    print("Type 'load <filename>' to load conversation")
-    print("-" * 50)
-    
+
+    # added color 
+    print(f"  {Fore.MAGENTA}quit{Style.RESET_ALL}, {Fore.MAGENTA}exit{Style.RESET_ALL},{Fore.MAGENTA}q{Style.RESET_ALL} - Exit session")
+    print(f"  {Fore.MAGENTA}clear{Style.RESET_ALL} - Clear Conversation History")
+    print(f"  {Fore.MAGENTA}save <filename>{Style.RESET_ALL} - Save conversation")
+    print(f"  {Fore.MAGENTA}load <filename>{Style.RESET_ALL} - Load conversation")
+    print_separator()    
+ 
     if system_prompt:
-        print(f"System prompt: {system_prompt}")
-        print("-" * 50)
+        print(f"{Fore.YELLOW}{Style.BRIGHT}System prompt: {Style.RESET_ALL}{system_prompt}")
+        print_separator()
     
     while True:
         try:
-            user_input = input("\nYou: ").strip()
+            user_input = input(f"\n{Fore.GREEN}{Style.BRIGHT}You: {Style.RESET_ALL}").strip()
             
             if user_input.lower() in config.INTERACTIVE_COMMANDS["quit"]:
-                print("Goodbye!")
+                print_success("Goodbye!")
                 break
                 
             if user_input.lower() == config.INTERACTIVE_COMMANDS["clear"][0]:
@@ -145,23 +174,23 @@ def interactive_mode(claude_cli: ClaudeCLI, model: str, max_tokens: int,
             if not user_input:
                 continue
                 
-            print("\nClaude: ", end="", flush=True)
+            print("\n{Fore.BLUE}{Style.BRIGHT}Claude: {Style.RESET_ALL}", end="", flush=True)
             response = claude_cli.send_message(user_input, model, max_tokens, system_prompt)
             
             if response["success"]:
-                print(response["message"])
+                print(f"{Fore.WHITE}{response['message']}{Style.RESET_ALL}")
                 if response.get("usage"):
                     usage = response["usage"]
-                    print(f"\n[Tokens - Input: {usage.get('input_tokens', 'N/A')}, "
-                          f"Output: {usage.get('output_tokens', 'N/A')}]")
+                    print(f"\n{Fore.CYAN}{Style.DIM}[Tokens - Input: {usage.get('input_tokens', 'N/A')}, "
+                          f"Output: {usage.get('output_tokens', 'N/A')}]{Style.RESET_ALL}")
             else:
                 print(f"Error: {response['error']}")
                 
         except KeyboardInterrupt:
-            print("\n\nGoodbye!")
+            print(f"\n\n{Fore.YELLOW}Interrupted by user. Goodbye!{Style.RESET_ALL}")
             break
         except EOFError:
-            print("\nGoodbye!")
+            print(f"\n{Fore.YELLOW}Goodbye!{Style.RESET_ALL}")
             break
 
 def single_message_mode(claude_cli: ClaudeCLI, message: str, model: str, 
@@ -170,25 +199,26 @@ def single_message_mode(claude_cli: ClaudeCLI, message: str, model: str,
     send a single message and print the response. One-off queries
 
     args:
-        claude_cli;
+        claude_cli:
         message:
         model:
         max_tokens:
         system_prompt:
     exit codes:
         0; success
-        1. error occured 
+        1. error occurred 
     """
     response = claude_cli.send_message(message, model, max_tokens, system_prompt)
     
     if response["success"]:
-        print(response["message"])
+        print(f"{Fore.WHITE}{response['message']}{Style.RESET_ALL}")
         if response.get("usage"):
             usage = response["usage"]
-            print(f"\n[Tokens - Input: {usage.get('input_tokens', 'N/A')}, "
-                  f"Output: {usage.get('output_tokens', 'N/A')}]", file=sys.stderr)
+            print(f"\n{Fore.CYAN}{Style.DIM}[Tokens - Input: {usage.get('input_tokens', 'N/A')}, "
+                  f"Output: {usage.get('output_tokens', 'N/A')}]{Style.RESET_ALL}", file=sys.stderr)
     else:
-        print(f"Error: {response['error']}", file=sys.stderr)
+        #print(f"Error: {response['error']}", file=sys.stderr)
+        print_error(response['error'])
         sys.exit(1)
 
 def main() -> None:
